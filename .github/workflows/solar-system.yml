@@ -75,7 +75,7 @@ jobs:
       - name: Build and publish
         run: |
           # Configure the project
-          jf npmc --repo-resolve codeninjas-proj-npm-virtual --repo-deploy codeninjas-proj-npm-virtual
+          jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
           # Build the project using JFrog CLI
           jf npm install --build-name ${{env.MOCHATESTRESULT}} --build-number ${{github.run_number}}
           # Publish the project
