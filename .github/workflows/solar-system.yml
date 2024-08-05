@@ -36,6 +36,8 @@ jobs:
       services:
         mongo-db:
           image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-local/mongodb:latest
+          options:
+            --name mongo
           ports:
             - 27017:27017
           credentials:
