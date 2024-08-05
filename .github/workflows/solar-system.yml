@@ -179,8 +179,8 @@ jobs:
 
         - name: Build Docker image
           run: |
-            docker build -t ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} .
+            jf docker build -t ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} .
 
         - name: Push Docker image to Artifactory
           run: |
-            jfrog rt docker-push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
+            jf docker push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
