@@ -161,31 +161,30 @@ jobs:
       
     
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+    Docker:
+      runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
 
-      - name: Set up JFrog CLI
-        uses: jfrog/setup-jfrog-cli-action@v2
-        with:
-          version: 'latest'
+        - name: Set up JFrog CLI
+          uses: jfrog/setup-jfrog-cli-action@v2
+          with:
+            version: 'latest'
 
-      - name: Configure JFrog CLI
-        run: |
-          jfrog rt config --url ${{ vars.JF_URL }} --user ${{ vars.JF_USERNAME }} --password ${{ secrets.JF_PASSWORD }}
+        - name: Configure JFrog CLI
+          run: |
+            jfrog rt config --url ${{ vars.JF_URL }} --user ${{ vars.JF_USERNAME }} --password ${{ secrets.JF_PASSWORD }}
 
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} .
+        - name: Build Docker image
+          run: |
+            docker build -t ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} .
 
-      - name: Push Docker image to Artifactory
-        run: |
-          jfrog rt docker-push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
-        env:
-          JFROG_CLI_JFROG_URL: ${{ vars.JF_URL }}
-          JFROG_CLI_JFROG_USER: ${{ vars.JF_USERNAME }}
-          JFROG_CLI_JFROG_PASSWORD: ${{ secrets.JF_PASSWORD }}
+        - name: Push Docker image to Artifactory
+          run: |
+            jfrog rt docker-push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
+          env:
+            JFROG_CLI_JFROG_URL: ${{ vars.JF_URL }}
+            JFROG_CLI_JFROG_USER: ${{ vars.JF_USERNAME }}
+            JFROG_CLI_JFROG_PASSWORD: ${{ secrets.JF_PASSWORD }}
