@@ -89,7 +89,7 @@ jobs:
 
       - name: Upload test results
         run: |
-          jf rt upload "test-results.xml" "codeninjas-proj-nag-npm-virtual/test-results"
+          jf rt upload "test-results.xml" "codeninjas-proj-nag-npm-virtual/test-results/test-results.xml"
         
                   
     code-coverage:
@@ -107,7 +107,7 @@ jobs:
             options:
               --name mongo
             env:
-              MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
+              MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@mongo:27017/superData'
 
 
         steps:
