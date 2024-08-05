@@ -177,9 +177,10 @@ jobs:
           with:
               oidc-provider-name: jfrog-github-oidc
 
-        - name: Build Docker image
+        - name: Build and scan Docker image
           run: |
             jf docker build -t ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} .
+            jf docker scan ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
 
         - name: Push Docker image to Artifactory
           run: |
