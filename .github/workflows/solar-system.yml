@@ -85,10 +85,9 @@ jobs:
         run: npm test
         id: nodejs-unit-testing-step
 
-      - name: Publish
+      - name: Upload test results
         run: |
-          # Publish the project
-          jf rt upload "test-results.xml" "codeninjas-proj-nag-npm-virtual" --build-name ${{ env.MOCHATESTRESULT }} --build-number ${{ github.run_id }}
+          jf rt upload "test-results.xml" "codeninjas-proj-nag-npm-virtual"
         
       # - name: Archive Test Result
       #   if: always()
