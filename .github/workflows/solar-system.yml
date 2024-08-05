@@ -109,7 +109,7 @@ jobs:
             ports:
             - 27017:27017
             env:
-              MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@mongo:27017/superData'
+              MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
 
 
 
