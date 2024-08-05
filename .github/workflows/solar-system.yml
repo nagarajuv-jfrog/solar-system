@@ -88,7 +88,7 @@ jobs:
       - name: Publish
         run: |
           # Publish the project
-          jf rt upload "test-results/test-results.xml" "codeninjas-proj-nag-npm-virtual" --build-name ${{ env.MOCHATESTRESULT }} --build-number ${{ github.run_id }}
+          jf rt upload "test-results.xml" "codeninjas-proj-nag-npm-virtual" --build-name ${{ env.MOCHATESTRESULT }} --build-number ${{ github.run_id }}
         
       # - name: Archive Test Result
       #   if: always()
