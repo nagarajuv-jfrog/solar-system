@@ -107,7 +107,7 @@ jobs:
             options:
               --name mongo
             env:
-              MONGO_URI: 'mongodb://mongo:27017/superData'
+              MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
 
 
         steps:
