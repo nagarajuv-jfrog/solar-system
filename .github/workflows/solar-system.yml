@@ -99,6 +99,13 @@ jobs:
         runs-on: ubuntu-latest
         env:
           MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
+          DOCKER_REPO: codeninjas-proj-nag-docker-local
+          IMAGE_NAME: 'mongodb:latest'
+          DOCKER_CLI_EXPERIMENTAL: enabled
+          JF_URL: https://${{ vars.JF_URL }}/
+          JF_PROJECT: ${{ vars.JF_PROJECT }}
+          MOCHATESTRESULT: 'Mocha-Test-Result'
+          JFROG_BUILD_STATUS: PASS
         services:
           mongo-db:
             image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-local/mongodb:latest
