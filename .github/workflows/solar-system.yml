@@ -78,7 +78,7 @@ jobs:
         run: |
           # Configure the project
           jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
-          # Build the project using JFrog CLI
+          # Install packages
           jf npm install
 
       - name: Unit Testing
