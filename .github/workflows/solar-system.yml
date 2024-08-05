@@ -72,17 +72,21 @@ jobs:
            jf rt ping
            jf config show
   
-      # - name: Unit Testing
-      #   run: npm test
-      #   id: nodejs-unit-testing-step
 
-      - name: Build and publish
+
+      - name: NPM Install
         run: |
           # Configure the project
           jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
           # Build the project using JFrog CLI
-          jf npm install
-          jf npm test
+          npm install
+
+      - name: Unit Testing
+        run: npm test
+        id: nodejs-unit-testing-step
+
+      - name: Publish
+        run: |
           # Publish the project
           jf npm publish  --build-name ${{env.MOCHATESTRESULT}} --path test-results.xml
         
