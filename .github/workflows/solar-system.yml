@@ -87,50 +87,53 @@ jobs:
 
       - name: Upload test results
         run: |
-          jf rt upload "test-results.xml" "codeninjas-proj-nag-npm-virtual"
+          jf rt upload "test-results.xml" "codeninjas-proj-nag-npm-virtual/test-results"
         
-      # - name: Archive Test Result
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: Mocha-Test-Result-${{github.run_number}}
-      #     path: test-results.xml
                   
-    # code-coverage:
-    #       name: Code Coverage
-    #       container:
-    #         image: node:18
-    #       services:
-    #         mongo-db:
-    #           image: siddharth67/mongo-db:non-prod
-    #           options:
-    #             --name mongo
-    #       env:
-    #         MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@mongo:27017/superData'
-    #       runs-on: ubuntu-latest
-    #       steps:
-    #       - name: Checkout Repository
-    #         uses: actions/checkout@v4
+    code-coverage:
+        name: Code Coverage
+        container:
+          image: node:18
+        runs-on: ubuntu-latest
 
-    #       - name: Cache NPM Dependencies
-    #         uses: actions/cache@v3
-    #         with:
-    #           path: node_modules
-    #           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+        services:
+          mongo-db:
+            image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-local/mongodb:latest
+            credentials:
+              username: ${{ vars.JF_USERNAME }}
+              password: ${{ secrets.JF_PASSWORD }}
+            options:
+              --name mongo
+            env:
+              MONGO_URI: 'mongodb://mongo:27017/superData'
+
+
+        steps:
+          - name: Checkout Repository
+            uses: actions/checkout@v4
+
+          - name: Cache NPM Dependencies
+            uses: actions/cache@v3
+            with:
+              path: node_modules
+              key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
+          - name: NPM Install
+            run: |
+              # Configure the project
+              jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
+              # Install packages
+              jf npm install
+  
+          - name: Check Code Coverage
+            id: nodejs-code-coverage-step
+            run: npm run coverage
+
+          - name: Upload test results
+            run: |
+              jf rt upload "coverage/" "codeninjas-proj-nag-npm-virtual/coverage"
       
-    #       - name: Install Dependencies
-    #         run: npm install
-      
-    #       - name: Check Code Coverage
-    #         id: nodejs-code-coverage-step
-    #         run: npm run coverage
-            
-    #       - name: Archive Test Result
-    #         if: always()
-    #         uses: actions/upload-artifact@v4
-    #         with:
-    #           name: Code-Coverage-Result-${{github.run_number}}
-    #           path: coverage
+    
 
     # docker:
     #   name: containerization
