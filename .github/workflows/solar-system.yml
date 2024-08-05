@@ -13,50 +13,35 @@ permissions:
   packages: write
   contents: read
 
-env:
-  MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
-  MONGO_USERNAME: ${{ vars.MONGO_USERNAME }}
-  MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
-  JF_URL: https://${{ vars.JF_URL }}/
-
 jobs:
-  unit-testing:
-    name: Unit Testing
-    services:
-      mongo-db:
-        image: mongo:latest  # Updated image name
-        ports:
-          - 27017:27017
-    env:
-      MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
-      JF_URL: https://${{ vars.JF_URL }}/
-      JF_PROJECT: ${{ vars.JF_PROJECT }}
-    strategy: 
-      matrix:
-        nodejs_version: [20]
-        operating_system: [ubuntu-latest]
-    runs-on: ${{ matrix.operating_system }}
-    steps:
-      - name: Authenticate Docker
-        uses: docker/login-action@v3
-        with:
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    unit-testing:
+      strategy: 
+        matrix:
+          nodejs_version: [20]
+          operating_system: [ubuntu-latest, macos-latest]
+          exclude:
+            - nodejs_version: 20
+              operating_system: macos-latest
+      runs-on: ${{ matrix.operating_system }}
+      env:
+        MONGO_URI: 'mongodb://${{ secrets.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
+        DOCKER_REPO: codeninjas-proj-nag-docker-local
+        IMAGE_NAME: 'mongodb:latest'
+        JF_URL: https://${{ vars.JF_URL }}/
+        DOCKER_CLI_EXPERIMENTAL: enabled
 
-      - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        id: setup-cli
-        env:
-          JF_URL: https://${{ vars.JF_URL }}/
-          JF_PROJECT: ${{ vars.JF_PROJECT }}
-        with:
-          oidc-provider-name: jfrog-github-oidc
+      name: Unit Testing
+      services:
+        mongo-db:
+          image: ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
+          ports:
+            - 27017:27017
+          credentials:
+            username: ${{ vars.JF_USERNAME }}
+            password: ${{ secrets.JF_PASSWORD }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Checkout Repository
+      steps:
+      - name: Checkout the repository
         uses: actions/checkout@v4
 
       - name: Setup NodeJS Version
@@ -69,69 +54,20 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
+  
       - name: Install Dependencies
         run: npm install
-
+  
       - name: Unit Testing
         run: npm test
         id: nodejs-unit-testing-step
-
+        
       - name: Archive Test Result
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Mocha-Test-Result-${{github.run_number}}
           path: test-results.xml
-
-
-
-
-    # unit-testing:
-    #   name: Unit Testing
-    #   services:
-    #     mongo-db:
-    #       image: siddharth67/mongo-db:non-prod
-    #       ports:
-    #         - 27017:27017
-    #   env:
-    #     MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
-    #   strategy: 
-    #     matrix:
-    #       nodejs_version: [20]
-    #       operating_system: [ubuntu-latest, macos-latest]
-    #       exclude:
-    #         - nodejs_version: 20
-    #           operating_system: macos-latest
-    #   runs-on: ${{ matrix.operating_system }}
-    #   steps:
-    #   - name: Checkout Repository
-    #     uses: actions/checkout@v4
-
-    #   - name: Setup NodeJS Version
-    #     uses: actions/setup-node@v4
-    #     with:
-    #       node-version: 20
-
-    #   - name: Cache NPM Dependencies
-    #     uses: actions/cache@v3
-    #     with:
-    #       path: node_modules
-    #       key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-  
-    #   - name: Install Dependencies
-    #     run: npm install
-  
-    #   - name: Unit Testing
-    #     run: npm test
-    #     id: nodejs-unit-testing-step
-        
-    #   - name: Archive Test Result
-    #     if: always()
-    #     uses: actions/upload-artifact@v4
-    #     with:
-    #       name: Mocha-Test-Result-${{github.run_number}}
-    #       path: test-results.xml
                   
     # code-coverage:
     #       name: Code Coverage
