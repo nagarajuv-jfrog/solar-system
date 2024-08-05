@@ -152,7 +152,7 @@ jobs:
 
           - name: Upload test results
             run: |
-              jf rt upload "coverage/*" "codeninjas-proj-nag-npm-virtual/coverage/"
+              jf rt upload "coverage/" "codeninjas-proj-nag-npm-virtual/coverage/"
       
     
 
