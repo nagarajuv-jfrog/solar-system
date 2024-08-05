@@ -33,7 +33,7 @@ jobs:
       name: Unit Testing
       services:
         mongo-db:
-          image: ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
+          image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-local/mongodb:latest
           ports:
             - 27017:27017
           credentials:
