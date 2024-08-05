@@ -32,7 +32,6 @@ jobs:
         JF_PROJECT: ${{ vars.JF_PROJECT }}
         MOCHATESTRESULT: 'Mocha-Test-Result'
         JFROG_BUILD_STATUS: PASS
-
       name: Unit Testing
       services:
         mongo-db:
@@ -60,6 +59,12 @@ jobs:
 
       - name: JFrog CLI setup 🐸
         uses: jfrog/setup-jfrog-cli@v4
+        id: setup-cli
+        env:
+          JF_URL: https://${{ vars.JF_URL }}/
+          JF_PROJECT: ${{ vars.JF_PROJECT }}
+        with:
+            oidc-provider-name: jfrog-github-oidc
 
       - name: Health check JFrog Artifactory instance 🐸
         run: |
@@ -75,11 +80,7 @@ jobs:
           jf npm install --build-name ${{env.MOCHATESTRESULT}} --build-number ${{github.run_number}}
           # Publish the project
           jf npm publish --build-name ${{env.MOCHATESTRESULT}} --build-number ${{github.run_number}}
-          env:
-            JF_URL: https://${{ vars.JF_URL }}/
-            JF_PROJECT: ${{ vars.JF_PROJECT }}
-          with:
-              oidc-provider-name: jfrog-github-oidc
+
   
       - name: Unit Testing
         run: npm test
