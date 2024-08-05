@@ -27,8 +27,11 @@ jobs:
         MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
         DOCKER_REPO: codeninjas-proj-nag-docker-local
         IMAGE_NAME: 'mongodb:latest'
-        JF_URL: https://${{ vars.JF_URL }}/
         DOCKER_CLI_EXPERIMENTAL: enabled
+        JF_URL: https://${{ vars.JF_URL }}/
+        JF_PROJECT: ${{ vars.JF_PROJECT }}
+        MOCHATESTRESULT: 'Mocha-Test-Result'
+        JFROG_BUILD_STATUS: PASS
 
       name: Unit Testing
       services:
@@ -54,9 +57,24 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-  
-      - name: Install Dependencies
-        run: npm install
+
+      - name: JFrog CLI setup 🐸
+        uses: jfrog/setup-jfrog-cli@v4
+
+      - name: Health check JFrog Artifactory instance 🐸
+        run: |
+           jf --version
+           jf rt ping
+           jf config show
+
+      - name: Build and publish
+        run: |
+          # Configure the project
+          jf npmc --repo-resolve codeninjas-proj-npm-virtual --repo-deploy codeninjas-proj-npm-virtual
+          # Build the project using JFrog CLI
+          jf npm install --build-name ${{env.MOCHATESTRESULT}} --build-number ${{github.run_number}}
+          # Publish the project
+          jf npm publish --build-name ${{env.MOCHATESTRESULT}} --build-number ${{github.run_number}}
   
       - name: Unit Testing
         run: npm test
