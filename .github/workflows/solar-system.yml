@@ -51,11 +51,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Cache NPM Dependencies
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
 
       - name: JFrog CLI setup 🐸
         uses: jfrog/setup-jfrog-cli@v4
@@ -80,6 +76,12 @@ jobs:
           jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
           # Install packages
           jf npm install
+
+      - name: Cache NPM Dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Unit Testing
         run: npm test
@@ -112,11 +114,14 @@ jobs:
           - name: Checkout Repository
             uses: actions/checkout@v4
 
-          - name: Cache NPM Dependencies
-            uses: actions/cache@v3
+          - name: JFrog CLI setup 🐸
+            uses: jfrog/setup-jfrog-cli@v4
+            id: setup-cli
+            env:
+              JF_URL: https://${{ vars.JF_URL }}/
+              JF_PROJECT: ${{ vars.JF_PROJECT }}
             with:
-              path: node_modules
-              key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+                oidc-provider-name: jfrog-github-oidc
 
           - name: NPM Install
             run: |
@@ -124,6 +129,12 @@ jobs:
               jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
               # Install packages
               jf npm install
+
+          - name: Cache NPM Dependencies
+            uses: actions/cache@v3
+            with:
+              path: node_modules
+              key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
   
           - name: Check Code Coverage
             id: nodejs-code-coverage-step
