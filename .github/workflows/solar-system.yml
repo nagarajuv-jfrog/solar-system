@@ -84,7 +84,7 @@ jobs:
           jf npm install
           jf npm test
           # Publish the project
-          jf npm publish  --build-name ${{env.BUILD_NAME}} --path test-results.xml
+          jf npm publish  --build-name ${{env.MOCHATESTRESULT}} --path test-results.xml
         
       # - name: Archive Test Result
       #   if: always()
