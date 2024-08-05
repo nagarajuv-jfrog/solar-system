@@ -98,7 +98,7 @@ jobs:
           image: node:18
         runs-on: ubuntu-latest
         env:
-          MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@localhost:27017/superData'
+          MONGO_URI: 'mongodb://mongo:27017/superData'
           DOCKER_REPO: codeninjas-proj-nag-docker-local
           IMAGE_NAME: 'mongodb:latest'
           DOCKER_CLI_EXPERIMENTAL: enabled
@@ -114,8 +114,6 @@ jobs:
               password: ${{ secrets.JF_PASSWORD }}
             options:
               --name mongo
-            ports:
-            - 27017:27017
 
 
 
