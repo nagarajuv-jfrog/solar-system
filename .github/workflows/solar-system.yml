@@ -71,27 +71,26 @@ jobs:
            jf --version
            jf rt ping
            jf config show
+  
+      - name: Unit Testing
+        run: npm test
+        id: nodejs-unit-testing-step
 
       - name: Build and publish
         run: |
           # Configure the project
           jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
           # Build the project using JFrog CLI
-          jf npm install --build-name ${{env.MOCHATESTRESULT}} --build-number ${{github.run_number}}
+          jf npm install
           # Publish the project
           jf npm publish --build-name ${{env.MOCHATESTRESULT}} --build-number ${{github.run_number}}
-
-  
-      - name: Unit Testing
-        run: npm test
-        id: nodejs-unit-testing-step
         
-      - name: Archive Test Result
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Mocha-Test-Result-${{github.run_number}}
-          path: test-results.xml
+      # - name: Archive Test Result
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Mocha-Test-Result-${{github.run_number}}
+      #     path: test-results.xml
                   
     # code-coverage:
     #       name: Code Coverage
