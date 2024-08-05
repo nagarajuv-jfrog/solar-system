@@ -157,13 +157,13 @@ jobs:
 
           - name: Upload test results
             run: |
-              jf rt u "coverage" codeninjas-proj-nag-npm-virtual/coverage
+              jf rt u "coverage/*" codeninjas-proj-nag-npm-virtual/coverage
       
     
 
     docker:
       name: containerization
-      needs: unit-testing
+      needs: [unit-testing, code-coverage]
       runs-on: ubuntu-latest
       steps:
         - name: Checkout repo
@@ -201,7 +201,7 @@ jobs:
             jf docker --version
             jf docker build --tag ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} --platform linux/amd64,linux/arm64 --metadata-file  metadata.json --push .
             
-        - name: docker scan
+        - name: docker push
           run: |  
-              jf docker pull ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
+              jf docker push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
               jf docker scan ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}   
