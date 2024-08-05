@@ -97,7 +97,7 @@ jobs:
     code-coverage:
         name: Code Coverage
         container:
-          image: node:18
+          image: node:20
         runs-on: ubuntu-latest
         env:
           MONGO_URI: 'mongodb://mongo:27017/superData'
