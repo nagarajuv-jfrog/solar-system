@@ -5,31 +5,27 @@ on:
     # The repository will be scanned once a day at 00:00 GMT.
     - cron: "* * * * *"
 permissions:
-  contents: write
-  pull-requests: write
-  security-events: write
-  actions: read
-  id-token: write
-  packages: write
+    contents: write
+    pull-requests: write
+    security-events: write
+    id-token: write
 jobs:
   frogbot:
     name: Run Frogbot
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Run Frogbot
-        uses: jfrog/frogbot@v2
+     -  uses: actions/checkout@v4
+     -  uses: jfrog/frogbot@v2
         with:
           oidc-provider-name: jfrog-github-oidc
           version: latest
         env:
-          JF_URL: https://productdemo.jfrog.io
+          JF_INSTALL_DEPS_CMD: "npm i"
+          JF_URL: https://${{ vars.JF_URL }}/
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-          JF_GIT_TOKEN: ${{ secrets.JF_GIT_TOKEN }}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JF_GIT_BASE_BRANCH: main
           JF_WORKING_DIR: .
           JF_PATH_EXCLUSIONS: "*git*,*node_modules*,*target*,*venv*,*test*"
-          JF_PROJECT: codeninjas-proj
+          JF_PROJECT: ${{ vars.JF_PROJECT }}
           JF_FAIL: FALSE
