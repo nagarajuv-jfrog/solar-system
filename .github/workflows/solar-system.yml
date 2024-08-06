@@ -159,7 +159,7 @@ jobs:
             run: |
               echo "Checking coverage directory..."
               ls -la coverage/
-              jf rt upload "coverage/*" "codeninjas-proj-nag-npm-virtual/"
+              jf rt upload "coverage/" codeninjas-proj-nag-npm-virtual/coverage-files/ --exclusions="\*install\*pack*"
             env:
               JFROG_CLI_JFROG_URL: ${{ vars.JFROG_URL }}
               JFROG_CLI_JFROG_USER: ${{ vars.JFROG_USERNAME }}
