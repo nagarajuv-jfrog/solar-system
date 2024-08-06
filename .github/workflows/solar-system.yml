@@ -13,7 +13,7 @@ permissions:
   packages: write
   contents: read
 env:
-  DOCKER_REPO: 'codeninjas-proj-nag-docker-local'
+  DOCKER_REPO: codeninjas-proj-nag-docker-virtual
   NPM_REPO: codeninjas-proj-nag-npm-virtual
   IMAGE_NAME: 'solar-system:${{ github.run_number }}'
   JF_URL: https://${{ vars.JF_URL }}/
@@ -31,7 +31,7 @@ jobs:
       runs-on: ${{ matrix.operating_system }}
       env:
         MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@mongo:27017/superData'
-        DOCKER_REPO: codeninjas-proj-nag-docker-local
+        DOCKER_REPO: codeninjas-proj-nag-docker-virtual
         IMAGE_NAME: 'mongodb:latest'
         DOCKER_CLI_EXPERIMENTAL: enabled
         JF_URL: https://${{ vars.JF_URL }}/
@@ -41,7 +41,7 @@ jobs:
       name: Unit Testing
       services:
         mongo-db:
-          image: ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/mongodb:latest
+          image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-virtual/mongodb:latest
           options:
             --name mongo
           ports:
@@ -116,7 +116,7 @@ jobs:
           JFROG_BUILD_STATUS: PASS
         services:
           mongo-db:
-            image: ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/mongodb:latest
+            image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-virtual/mongodb:latest
             credentials:
               username: ${{ vars.JF_USERNAME }}
               password: ${{ secrets.JF_PASSWORD }}
