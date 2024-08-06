@@ -199,3 +199,7 @@ jobs:
           jf rt build-add-dependencies .
           jf rt build-add-git
           jf rt build-publish
+
+      - name: build scan
+        run: |            
+          jf build-scan
