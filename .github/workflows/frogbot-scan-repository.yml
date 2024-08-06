@@ -8,8 +8,9 @@ permissions:
   contents: write
   pull-requests: write
   security-events: write
-  # [Mandatory If using OIDC authentication protocol instead of JF_ACCESS_TOKEN]
+  actions: read
   id-token: write
+  packages: write
 jobs:
   scan-repository:
     runs-on: ubuntu-latest
