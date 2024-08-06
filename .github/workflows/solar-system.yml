@@ -180,15 +180,37 @@ jobs:
         run: |
           jf docker push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
 
-      - name: add docker package to build
-        run: |  
+          - name: Display Metadata
+          run: |
+            echo "----------------"
             echo "----------------"
             cat metadata.json
             echo "----------------"
-            digest=$(cat metadata.json | jq '.["containerimage.digest"]')
-            echo "digest=$digest"
-            echo "${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}@$digest" > metadata.json
-            jf rt build-docker-create ${{ env.DOCKER_REPO }} --image-file metadata.json 
+      
+      - name: Update Digest in Metadata
+        run: |
+          digest=$(cat metadata.json | jq -r '.["containerimage.digest"]')
+          echo "digest=$digest"
+          jq --arg digest "$digest" '.["image.name"] = "productdemo.jfrog.io/codeninjas-proj-nag-docker-virtual/solar-system:87@$digest"' metadata.json > temp.json && mv temp.json metadata.json
+    
+      - name: Create Docker Build
+        run: |
+          jf rt build-docker-create codeninjas-proj-nag-docker-virtual --image-file metadata.json
+        env:
+          DOCKER_REPO: codeninjas-proj-nag-docker-virtual
+          NPM_REPO: codeninjas-proj-nag-npm-virtual
+          IMAGE_NAME: solar-system:87
+          JF_URL: https://productdemo.jfrog.io
+          DOCKER_CLI_EXPERIMENTAL: enabled
+          BUILD_NAME: solar-system
+          JFROG_CLI_ENV_EXCLUDE: *password*;*secret*;*key*;*token*;*auth*;JF_ARTIFACTORY_*;JF_ENV_*;JF_URL;JF_USER;JF_PASSWORD;JF_ACCESS_TOKEN
+          JFROG_CLI_OFFER_CONFIG: false
+          JFROG_CLI_BUILD_NAME: Solar System Workflow
+          JFROG_CLI_BUILD_NUMBER: 87
+          JFROG_CLI_BUILD_URL: https://github.com/nagarajuv-jfrog/solar-system/actions/runs/10261417779
+          JFROG_CLI_USER_AGENT: setup-jfrog-cli-github-action/4.2.1
+          JFROG_CLI_BUILD_PROJECT: codeninjas-proj
+          JFROG_CLI_COMMAND_SUMMARY_OUTPUT_DIR: /home/runner/work/_temp
 
       # - name: Publish Build Info
       #   run: |
