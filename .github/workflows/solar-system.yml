@@ -19,6 +19,7 @@ env:
   IMAGE_NAME: 'solar-system:${{ github.run_number }}'
   JF_URL: https://${{ vars.JF_URL }}
   DOCKER_CLI_EXPERIMENTAL: enabled
+  BUILD_NAME: solar-system
 
 jobs:
   unit-testing:
@@ -125,7 +126,9 @@ jobs:
       - name: NPM Install
         run: |
           jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
-          jf npm install
+          jf npm install --build-name ${{env.BUILD_NAME}} --build-number ${{github.run_number}}
+          # Publish the project
+          jf npm publish --build-name ${{env.BUILD_NAME}} --build-number ${{github.run_number}}
 
       - name: Cache NPM Dependencies
         uses: actions/cache@v3
