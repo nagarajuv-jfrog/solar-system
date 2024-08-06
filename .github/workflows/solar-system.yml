@@ -14,6 +14,7 @@ permissions:
   contents: read
 env:
   DOCKER_REPO: 'codeninjas-proj-nag-docker-local'
+  NPM_REPO: codeninjas-proj-nag-npm-virtual
   IMAGE_NAME: 'solar-system:${{ github.run_number }}'
   JF_URL: https://${{ vars.JF_URL }}/
   DOCKER_CLI_EXPERIMENTAL: enabled
@@ -40,7 +41,7 @@ jobs:
       name: Unit Testing
       services:
         mongo-db:
-          image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-local/mongodb:latest
+          image: ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/mongodb:latest
           options:
             --name mongo
           ports:
@@ -115,7 +116,7 @@ jobs:
           JFROG_BUILD_STATUS: PASS
         services:
           mongo-db:
-            image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-local/mongodb:latest
+            image: ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/mongodb:latest
             credentials:
               username: ${{ vars.JF_USERNAME }}
               password: ${{ secrets.JF_PASSWORD }}
@@ -186,3 +187,38 @@ jobs:
         - name: Push Docker image to Artifactory
           run: |
             jf docker push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
+
+
+        - name: Docker Build 🐳🐸
+          run: |
+              jf docker build -t ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} .
+
+        - name: JFrog docker image scan 🐳🐸
+          run: |
+              jf docker scan ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
+
+        - name: Docker Push 🐳🐸
+          run: |
+              jf docker push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
+
+        - name: Publish build build-info
+          run: |
+            # Collect and store environment variables in the build-info
+            jf rt bce ${{env.IMAGE_NAME}} ${{github.run_number}}
+            # Collect and store VCS details in the build-info
+            jf rt bag ${{env.IMAGE_NAME}} ${{github.run_number}}
+            # Publish the build-info to Artifactory
+            jf rt bp ${{env.IMAGE_NAME}} ${{github.run_number}}
+            # Scan the published build-info with Xray
+            jf rt bs ${{env.IMAGE_NAME}} ${{github.run_number}}
+            #list files
+            ls -ltr ${{ github.workspace }}
+            #echo values
+            echo "JF_URL" ${{ vars.JF_URL }}
+            echo "JF_PASSWORD" ${{ secrets.JF_PASSWORD }}
+            echo "JF_USER" ${{ vars.JF_USERNAME }}
+            echo "JF_ACCESS_TOKEN" ${{secrets.JF_ACCESS_TOKEN}}
+            echo "DOCKER_JF_RT_REPO" ${{ env.DOCKER_REPO }}
+            echo "NPM_JF_RT_REPO" ${{ env.NPM_REPO }}
+            echo "Done!!!"
+     
