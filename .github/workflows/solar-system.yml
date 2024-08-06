@@ -17,7 +17,7 @@ env:
   DOCKER_REPO: codeninjas-proj-nag-docker-virtual
   NPM_REPO: codeninjas-proj-nag-npm-virtual
   IMAGE_NAME: 'solar-system:${{ github.run_number }}'
-  JF_URL: https://${{ vars.JF_URL }}/
+  JF_URL: https://${{ vars.JF_URL }}
   DOCKER_CLI_EXPERIMENTAL: enabled
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
       MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@mongo:27017/superData'
       DOCKER_REPO: codeninjas-proj-nag-docker-virtual
       IMAGE_NAME: 'mongodb:latest'
-      JF_URL: https://${{ vars.JF_URL }}/
+      JF_URL: https://${{ vars.JF_URL }}
       JF_PROJECT: ${{ vars.JF_PROJECT }}
       MOCHATESTRESULT: 'Mocha-Test-Result'
       JFROG_BUILD_STATUS: PASS
