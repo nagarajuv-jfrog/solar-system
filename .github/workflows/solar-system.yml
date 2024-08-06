@@ -73,7 +73,7 @@ jobs:
 
       - name: NPM Install
         run: |
-          jf npmc --repo-resolve codeninjas-proj-nag-npm-local --repo-deploy codeninjas-proj-nag-npm-virtual
+          jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
           jf npm install
 
       - name: Cache NPM Dependencies
