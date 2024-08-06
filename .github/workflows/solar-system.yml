@@ -40,7 +40,7 @@ jobs:
       JFROG_BUILD_STATUS: PASS
     services:
       mongo-db:
-        image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-local/mongodb:latest
+        image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-virtual/mongodb:latest
         options: --name mongo
         ports:
           - 27017:27017
