@@ -155,9 +155,15 @@ jobs:
             id: nodejs-code-coverage-step
             run: npm run coverage
 
-          - name: Upload test results
+          - name: Upload coverage files
             run: |
-             jf rt upload "coverage" "codeninjas-proj-nag-npm-virtual/coverage/"
+              echo "Checking coverage directory..."
+              ls -la coverage/
+              jf rt upload "coverage/*" "codeninjas-proj-nag-npm-virtual/coverage/"
+            env:
+              JFROG_CLI_JFROG_URL: ${{ vars.JFROG_URL }}
+              JFROG_CLI_JFROG_USER: ${{ vars.JFROG_USERNAME }}
+              JFROG_CLI_JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
 
 
     Docker:
