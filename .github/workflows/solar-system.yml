@@ -164,6 +164,10 @@ jobs:
         run: |
           jf docker build -t ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} --metadata-file  metadata.json --push .
           jf docker scan ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
+          with:
+            registry: ${{ vars.JF_URL }}
+            username: ${{ steps.setup-cli.outputs.oidc-user }}
+            password: ${{ steps.setup-cli.outputs.oidc-token }}
 
       - name: Push Docker Image to Artifactory
         run: |
