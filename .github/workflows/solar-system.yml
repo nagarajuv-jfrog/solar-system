@@ -12,6 +12,7 @@ permissions:
   id-token: write
   packages: write
   contents: read
+
 env:
   DOCKER_REPO: codeninjas-proj-nag-docker-virtual
   NPM_REPO: codeninjas-proj-nag-npm-virtual
@@ -20,69 +21,59 @@ env:
   DOCKER_CLI_EXPERIMENTAL: enabled
 
 jobs:
-    unit-testing:
-      strategy: 
-        matrix:
-          nodejs_version: [20]
-          operating_system: [ubuntu-latest, macos-latest]
-          exclude:
-            - nodejs_version: 20
-              operating_system: macos-latest
-      runs-on: ${{ matrix.operating_system }}
-      env:
-        MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@mongo:27017/superData'
-        DOCKER_REPO: codeninjas-proj-nag-docker-virtual
-        IMAGE_NAME: 'mongodb:latest'
-        DOCKER_CLI_EXPERIMENTAL: enabled
-        JF_URL: https://${{ vars.JF_URL }}/
-        JF_PROJECT: ${{ vars.JF_PROJECT }}
-        MOCHATESTRESULT: 'Mocha-Test-Result'
-        JFROG_BUILD_STATUS: PASS
-      name: Unit Testing
-      services:
-        mongo-db:
-          image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-virtual/mongodb:latest
-          options:
-            --name mongo
-          ports:
-            - 27017:27017
-          credentials:
-            username: ${{ vars.JF_USERNAME }}
-            password: ${{ secrets.JF_PASSWORD }}
-
-      steps:
+  unit-testing:
+    strategy:
+      matrix:
+        nodejs_version: [20]
+        operating_system: [ubuntu-latest, macos-latest]
+        exclude:
+          - nodejs_version: 20
+            operating_system: macos-latest
+    runs-on: ${{ matrix.operating_system }}
+    env:
+      MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@mongo:27017/superData'
+      DOCKER_REPO: codeninjas-proj-nag-docker-virtual
+      IMAGE_NAME: 'mongodb:latest'
+      JF_URL: https://${{ vars.JF_URL }}/
+      JF_PROJECT: ${{ vars.JF_PROJECT }}
+      MOCHATESTRESULT: 'Mocha-Test-Result'
+      JFROG_BUILD_STATUS: PASS
+    services:
+      mongo-db:
+        image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-virtual/mongodb:latest
+        options: --name mongo
+        ports:
+          - 27017:27017
+        credentials:
+          username: ${{ vars.JF_USERNAME }}
+          password: ${{ secrets.JF_PASSWORD }}
+    steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
 
-      - name: Setup NodeJS Version
+      - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-
-
-      - name: JFrog CLI setup 🐸
+      - name: JFrog CLI setup
         uses: jfrog/setup-jfrog-cli@v4
         id: setup-cli
         env:
-          JF_URL: https://${{ vars.JF_URL }}/
+          JF_URL: ${{ env.JF_URL }}
           JF_PROJECT: ${{ vars.JF_PROJECT }}
         with:
-            oidc-provider-name: jfrog-github-oidc
+          oidc-provider-name: jfrog-github-oidc
 
-      - name: Health check JFrog Artifactory instance 🐸
+      - name: Health check JFrog Artifactory instance
         run: |
-           jf --version
-           jf rt ping
-           jf config show
-  
-
+          jf --version
+          jf rt ping
+          jf config show
 
       - name: NPM Install
         run: |
-          # Configure the project
           jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
-          # Install packages
           jf npm install
 
       - name: Cache NPM Dependencies
@@ -93,131 +84,99 @@ jobs:
 
       - name: Unit Testing
         run: npm test
-        id: nodejs-unit-testing-step
 
-      - name: Upload test results
+      - name: Upload Test Results
         run: |
           jf rt upload "test-results.xml" "codeninjas-proj-nag-npm-virtual/test-results/test-results.xml"
         
-                  
-    code-coverage:
-        name: Code Coverage
-        container:
-          image: node:20
-        runs-on: ubuntu-latest
+  code-coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    container:
+      image: node:20
+    env:
+      MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@mongo:27017/superData'
+      DOCKER_REPO: codeninjas-proj-nag-docker-local
+      IMAGE_NAME: 'mongodb:latest'
+      JF_URL: https://${{ vars.JF_URL }}/
+      JF_PROJECT: ${{ vars.JF_PROJECT }}
+      MOCHATESTRESULT: 'Mocha-Test-Result'
+      JFROG_BUILD_STATUS: PASS
+    services:
+      mongo-db:
+        image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-virtual/mongodb:latest
+        credentials:
+          username: ${{ vars.JF_USERNAME }}
+          password: ${{ secrets.JF_PASSWORD }}
+        options: --name mongo
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: JFrog CLI setup
+        uses: jfrog/setup-jfrog-cli@v4
+        id: setup-cli
         env:
-          MONGO_URI: 'mongodb://${{ vars.MONGO_USERNAME }}:${{ secrets.MONGO_PASSWORD }}@mongo:27017/superData'
-          DOCKER_REPO: codeninjas-proj-nag-docker-local
-          IMAGE_NAME: 'mongodb:latest'
-          DOCKER_CLI_EXPERIMENTAL: enabled
-          JF_URL: https://${{ vars.JF_URL }}/
+          JF_URL: ${{ env.JF_URL }}
           JF_PROJECT: ${{ vars.JF_PROJECT }}
-          MOCHATESTRESULT: 'Mocha-Test-Result'
-          JFROG_BUILD_STATUS: PASS
-        services:
-          mongo-db:
-            image: ${{ vars.JF_URL }}/codeninjas-proj-nag-docker-virtual/mongodb:latest
-            credentials:
-              username: ${{ vars.JF_USERNAME }}
-              password: ${{ secrets.JF_PASSWORD }}
-            options:
-              --name mongo
+        with:
+          oidc-provider-name: jfrog-github-oidc
 
+      - name: NPM Install
+        run: |
+          jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
+          jf npm install
 
+      - name: Cache NPM Dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
 
+      - name: Check Code Coverage
+        run: npm run coverage
 
-        steps:
-          - name: Checkout Repository
-            uses: actions/checkout@v4
+      - name: Upload Coverage Files
+        run: |
+          echo "Checking coverage directory..."
+          ls -la coverage/
+          jf rt upload "coverage/" codeninjas-proj-nag-npm-virtual/ --exclusions="*install*pack*"
 
-          - name: JFrog CLI setup 🐸
-            uses: jfrog/setup-jfrog-cli@v4
-            id: setup-cli
-            env:
-              JF_URL: https://${{ vars.JF_URL }}/
-              JF_PROJECT: ${{ vars.JF_PROJECT }}
-            with:
-                oidc-provider-name: jfrog-github-oidc
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-          - name: NPM Install
-            run: |
-              # Configure the project
-              jf npmc --repo-resolve codeninjas-proj-nag-npm-virtual --repo-deploy codeninjas-proj-nag-npm-virtual
-              # Install packages
-              jf npm install
+      - name: JFrog CLI setup
+        uses: jfrog/setup-jfrog-cli@v4
+        id: setup-cli
+        env:
+          JF_URL: ${{ env.JF_URL }}
+          JF_PROJECT: ${{ vars.JF_PROJECT }}
+        with:
+          oidc-provider-name: jfrog-github-oidc
 
-          - name: Cache NPM Dependencies
-            uses: actions/cache@v3
-            with:
-              path: node_modules
-              key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-  
-          - name: Check Code Coverage
-            id: nodejs-code-coverage-step
-            run: npm run coverage
+      - name: Build and Scan Docker Image
+        run: |
+          jf docker build -t ${{ env.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} .
+          jf docker scan ${{ env.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
 
-          - name: Upload coverage files
-            run: |
-              echo "Checking coverage directory..."
-              ls -la coverage/
-              jf rt upload "coverage/" codeninjas-proj-nag-npm-virtual/ --exclusions="\*install\*pack*"
+      - name: Push Docker Image to Artifactory
+        run: |
+          jf docker push ${{ env.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
 
-
-    Docker:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v3
-
-        - name: JFrog CLI setup 🐸
-          uses: jfrog/setup-jfrog-cli@v4
-          id: setup-cli
-          env:
-            JF_URL: https://${{ vars.JF_URL }}/
-            JF_PROJECT: ${{ vars.JF_PROJECT }}
-          with:
-              oidc-provider-name: jfrog-github-oidc
-
-        - name: Build and scan Docker image
-          run: |
-            jf docker build -t ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} .
-            jf docker scan ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
-
-        - name: Push Docker image to Artifactory
-          run: |
-            jf docker push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
-
-
-        - name: Docker Build 🐳🐸
-          run: |
-              jf docker build -t ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }} .
-
-        - name: JFrog docker image scan 🐳🐸
-          run: |
-              jf docker scan ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
-
-        - name: Docker Push 🐳🐸
-          run: |
-              jf docker push ${{ vars.JF_URL }}/${{ env.DOCKER_REPO }}/${{ env.IMAGE_NAME }}
-
-        - name: Publish build build-info
-          run: |
-            # Collect and store environment variables in the build-info
-            jf rt bce ${{env.IMAGE_NAME}} ${{github.run_number}}
-            # Collect and store VCS details in the build-info
-            jf rt bag ${{env.IMAGE_NAME}} ${{github.run_number}}
-            # Publish the build-info to Artifactory
-            jf rt bp ${{env.IMAGE_NAME}} ${{github.run_number}}
-            # Scan the published build-info with Xray
-            jf rt bs ${{env.IMAGE_NAME}} ${{github.run_number}}
-            #list files
-            ls -ltr ${{ github.workspace }}
-            #echo values
-            echo "JF_URL" ${{ vars.JF_URL }}
-            echo "JF_PASSWORD" ${{ secrets.JF_PASSWORD }}
-            echo "JF_USER" ${{ vars.JF_USERNAME }}
-            echo "JF_ACCESS_TOKEN" ${{secrets.JF_ACCESS_TOKEN}}
-            echo "DOCKER_JF_RT_REPO" ${{ env.DOCKER_REPO }}
-            echo "NPM_JF_RT_REPO" ${{ env.NPM_REPO }}
-            echo "Done!!!"
+      - name: Publish Build Info
+        run: |
+          jf rt bce ${{ env.IMAGE_NAME }} ${{ github.run_number }}
+          jf rt bag ${{ env.IMAGE_NAME }} ${{ github.run_number }}
+          jf rt bp ${{ env.IMAGE_NAME }} ${{ github.run_number }}
+          jf rt bs ${{ env.IMAGE_NAME }} ${{ github.run_number }}
+          ls -ltr ${{ github.workspace }}
+          echo "JF_URL: ${{ env.JF_URL }}"
+          echo "JF_PASSWORD: ${{ secrets.JF_PASSWORD }}"
+          echo "JF_USER: ${{ vars.JF_USERNAME }}"
+          echo "JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}"
+          echo "DOCKER_JF_RT_REPO: ${{ env.DOCKER_REPO }}"
+          echo "NPM_JF_RT_REPO: ${{ env.NPM_REPO }}"
+          echo "Done!!!"
